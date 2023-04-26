@@ -7,7 +7,7 @@ In the root directory, run the following command:
 
 `javac HTTPServer.java`
 
-### Run the Server (port 17)
+### Run the Server (port 8080)
 `java HTTPServer`
 
-Once connected, use Postman to make GET, PUT, POST, DELETE, and HEAD requests to the server. 
+Once connected, use Postman to make GET, PUT, POST, DELETE, and HEAD requests to the local server. 
