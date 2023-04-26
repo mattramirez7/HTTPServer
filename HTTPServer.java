@@ -32,6 +32,8 @@ public class HTTPServer {
                         PUT(in, out, path);
                     } else if(method.equals("DELETE")) {
                         DELETE(out, path);
+                    } else if(method.equals("HEAD")) {
+                        HEAD(out, path);
                     }
                 }
         } catch(Exception err) {
@@ -54,8 +56,10 @@ public class HTTPServer {
                 reader.close();
             } else {
                 out.println("HTTP/1.1 404 Not Found");
+                out.println("Content-Type: text/html");
                 out.println();
-                out.println("File not found");
+                String cat = "<html><body><h1>404 - Not Found</h1><img src='https://http.cat/404'></body></html>";
+                out.println(cat);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -66,32 +70,27 @@ public class HTTPServer {
        
         try {
             File file = new File(rootPath + File.separator + path);
-            if (file.exists()) {
-                int contentLength = 0;
-                String line;
+            int contentLength = 0;
+            String line;
 
-                while ((line = in.readLine()) != null && !line.isEmpty()) {
-                    if (line.startsWith("Content-Length:")) {
-                        contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
-                    }
+            while ((line = in.readLine()) != null && !line.isEmpty()) {
+                if (line.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
                 }
-
-                StringBuilder requestBody = new StringBuilder();
-                for (int i = 0; i < contentLength; i++) {
-                    requestBody.append((char)in.read());
-                }
-                
-                FileWriter fileWriter = new FileWriter(file, true);
-                fileWriter.write(requestBody.toString());
-                fileWriter.close();
-
-                out.println("HTTP/1.1 200 OK");
-                out.println();
-            } else {
-                out.println("HTTP/1.1 404 Not Found");
-                out.println();
-                out.println("File not found");
             }
+
+            StringBuilder requestBody = new StringBuilder();
+            for (int i = 0; i < contentLength; i++) {
+                requestBody.append((char)in.read());
+            }
+            
+            FileWriter fileWriter = new FileWriter(file, true);
+            fileWriter.write(requestBody.toString());
+            fileWriter.close();
+
+            out.println("HTTP/1.1 200 OK");
+            out.println();
+        
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -123,7 +122,10 @@ public class HTTPServer {
         } catch (Exception e) {
             e.printStackTrace();
             out.println("HTTP/1.1 500 Internal Server Error");
+            out.println("Content-Type: text/html");
             out.println();
+            String cat = "<html><body><h1>500 - Internal Server Error</h1><img src='https://http.cat/500'></body></html>";
+            out.println(cat);
         }
     }
     
@@ -138,18 +140,49 @@ public class HTTPServer {
                     out.println("File deleted successfully");
                 } else {
                     out.println("HTTP/1.1 500 Internal Server Error");
+                    out.println("Content-Type: text/html");
                     out.println();
-                    out.println("Failed to delete file");
+                    String cat = "<html><body><h1>500 - Internal Server Error</h1><img src='https://http.cat/500'></body></html>";
+                    out.println(cat);
                 }
             } else {
                 out.println("HTTP/1.1 404 Not Found");
+                out.println("Content-Type: text/html");
                 out.println();
-                out.println("File not found");
+                String cat = "<html><body><h1>404 - Not Found</h1><img src='https://http.cat/404'></body></html>";
+                out.println(cat);
             }
         } catch (Exception e) {
             out.println("HTTP/1.1 500 Internal Server Error");
+            out.println("Content-Type: text/html");
             out.println();
-            out.println("Failed to delete file: " + e.getMessage());
+            String cat = "<html><body><h1>500 - Internal Server Error</h1><img src='https://http.cat/500'></body></html>";
+            out.println(cat);
+        }
+    }    
+
+    public static void HEAD(PrintWriter out, String path) {
+        try {
+            File file = new File(rootPath + File.separator + path);
+            if (file.exists()) {
+                out.println("HTTP/1.1 200 OK");
+                out.println("Content-Type: text/plain");
+                out.println("Content-Length: " + file.length());
+                out.println();
+            } else {
+                out.println("HTTP/1.1 404 Not Found");
+                out.println("Content-Type: text/html");
+                out.println();
+                String cat = "<html><body><h1>404 - Not Found</h1><img src='https://http.cat/404'></body></html>";
+                out.println(cat);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            out.println("HTTP/1.1 500 Internal Server Error");
+            out.println("Content-Type: text/html");
+            out.println();
+            String cat = "<html><body><h1>500 - Internal Server Error</h1><img src='https://http.cat/500'></body></html>";
+            out.println(cat);
         }
     }    
     public static void main(String... args) {
