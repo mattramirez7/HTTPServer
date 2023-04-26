@@ -49,6 +49,7 @@ public class HTTPServer {
                 String line;
                 out.println("HTTP/1.1 200 OK");
                 out.println("Content-Type: text/plain");
+                out.println("Content-Length: " + file.length());
                 out.println();
                 while ((line = reader.readLine()) != null) {
                     out.println(line);
@@ -84,13 +85,20 @@ public class HTTPServer {
                 requestBody.append((char)in.read());
             }
             
-            FileWriter fileWriter = new FileWriter(file, true);
-            fileWriter.write(requestBody.toString());
-            fileWriter.close();
+            if (path.substring(path.length() - 3).equals("txt")) {
+                FileWriter fileWriter = new FileWriter(file, true);
+                fileWriter.write(requestBody.toString());
+                fileWriter.close();
 
-            out.println("HTTP/1.1 200 OK");
-            out.println();
-        
+                out.println("HTTP/1.1 200 OK");
+                out.println();
+            } else {
+                out.println("HTTP/1.1 400 Bad Request");
+                out.println("Content-Type: text/html");
+                out.println();
+                String cat = "<html><body><h1>400 - Bad Request</h1><img src='https://http.cat/400'></body></html>";
+                out.println(cat);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
